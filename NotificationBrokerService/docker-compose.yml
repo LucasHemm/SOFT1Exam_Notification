@@ -1,0 +1,6 @@
+﻿services:
+  notificationbrokerservice:
+    image: notificationbrokerservice
+    build:
+      context: .
+      dockerfile: NotificationBrokerService/Dockerfile
