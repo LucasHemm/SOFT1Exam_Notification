@@ -1,0 +1,19 @@
+﻿global:
+  scrape_interval: 15s  # How often to scrape targets by default.
+
+scrape_configs:
+  # Scrape configuration for your application.
+  - job_name: 'app'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+    metrics_path: '/metrics'  # Optional, default is /metrics
+
+  # Scrape configuration for SQL Server.
+  - job_name: 'sql_server'
+    static_configs:
+      - targets: ['orderandfeedbackservicedb:1433']  # Replace with your SQL Server container and port.
+
+  # (Optional) Add Prometheus itself as a target for monitoring.
+#  - job_name: 'prometheus'
+#    static_configs:
+#      - targets: ['localhost:9090']  # Prometheus server endpoint.

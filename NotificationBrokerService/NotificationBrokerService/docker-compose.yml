@@ -1,0 +1,74 @@
+﻿version: '3.8'
+
+services:
+  # NotificationBrokerService (No Database Dependency)
+  notificationbrokerservice:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: notificationbrokerservicecontainer
+    environment:
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMQ__Host=rabbitmq
+      - RabbitMQ__Port=5672
+      - RabbitMQ__Username=guest
+      - RabbitMQ__Password=guest
+      - SendGrid__ApiKey=YOUR_SENDGRID_API_KEY
+      - SendGrid__FromEmail=noreply@yourdomain.com
+    ports:
+      - "8086:8080"  # Host port 8086 maps to container port 8080
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - mtogo-network
+
+  # RabbitMQ Service
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmqnotification
+    ports:
+      - "5672:5672"      # RabbitMQ main port
+      - "15672:15672"    # RabbitMQ management UI
+    environment:
+      - RABBITMQ_DEFAULT_USER=guest
+      - RABBITMQ_DEFAULT_PASS=guest
+    healthcheck:
+      test: ["CMD", "rabbitmqctl", "status"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - mtogo-network
+
+  # Prometheus Service
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: notificationprometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9096:9090"  # Host port 9096 maps to container port 9090
+    networks:
+      - mtogo-network
+
+  # Grafana Service
+  grafana:
+    image: grafana/grafana:latest
+    container_name: notificationgrafana
+    ports:
+      - "3006:3000"  # Host port 3006 maps to container port 3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+    networks:
+      - mtogo-network
+
+# Volumes to persist data
+volumes:
+  grafana_data:
+
+# Networks to connect the services
+networks:
+  mtogo-network:
+    driver: bridge
