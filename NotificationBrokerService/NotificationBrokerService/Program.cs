@@ -90,7 +90,7 @@ namespace NotificationService
                     }
                 };
 
-                // Start consuming messages
+                // Start consuming messages testy
                 channel.BasicConsume(queue: queueName,
                                      autoAck: false,
                                      consumer: consumer);
